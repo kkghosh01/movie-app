@@ -1,5 +1,5 @@
 const express = require("express");
-const moviesRouter = require("./routes/moviesRoutes.js");
+const moviesRouter = require("./Routes/moviesRoutes.js");
 
 const app = express();
 

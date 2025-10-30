@@ -1,19 +1,26 @@
 const express = require("express");
 const {
+  checkIfExistsById,
+  checkIfExistsBySlug,
+} = require("./../Middlewares/checkIfExists.js");
+const {
   getAllMovies,
   addMovie,
-  getMovie,
+  getMovieById,
   updateMovie,
   deleteMovie,
-  checkMovieId,
-  validateBody,
-} = require("../handler/moviesHandler.js");
+  getMovieBySlug,
+} = require("../Controllers/moviesController.js");
+const Movie = require("../Models/movieModel.js");
 
 const router = express.Router();
 
-router.param("id", checkMovieId);
-
-router.route("/").get(getAllMovies).post(validateBody, addMovie);
-router.route("/:id").get(getMovie).patch(updateMovie).delete(deleteMovie);
+router.route("/").get(getAllMovies).post(addMovie);
+router
+  .route("/:id")
+  .get(checkIfExistsById(Movie), getMovieById)
+  .patch(checkIfExistsById(Movie), updateMovie)
+  .delete(checkIfExistsById(Movie), deleteMovie);
+router.route("/slug/:slug").get(checkIfExistsBySlug(Movie), getMovieBySlug);
 
 module.exports = router;
