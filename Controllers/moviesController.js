@@ -1,4 +1,5 @@
 const Movie = require("./../Models/movieModel.js");
+const uploadToCloudinary = require("./../Utils/cloudinary.js");
 
 const getAllMovies = async (req, res) => {
   try {
@@ -58,21 +59,30 @@ const getMovieBySlug = (req, res) => {
 
 const addMovie = async (req, res) => {
   try {
-    const movie = await Movie.create(req.body);
+    // coverImage file buffer পাওয়া
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ status: "fail", message: "Cover image required" });
+    }
+
+    // Cloudinary upload
+    const result = await uploadToCloudinary(req.file.buffer, "movies");
+
+    // Movie document create
+    const movie = await Movie.create({
+      ...req.body,
+      coverImage: result.secure_url,
+    });
+
     res.status(201).json({
       status: "success",
-      data: {
-        movie,
-      },
+      data: { movie },
     });
   } catch (error) {
     res.status(400).json({
       status: "fail",
-      message: error.errors
-        ? Object.values(error.errors)
-            .map((el) => el.message)
-            .join(",")
-        : error.message,
+      message: error.message,
     });
   }
 };

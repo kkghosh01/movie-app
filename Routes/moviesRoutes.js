@@ -1,4 +1,5 @@
 const express = require("express");
+const upload = require("./../Middlewares/upload.js");
 const {
   checkIfExistsById,
   checkIfExistsBySlug,
@@ -15,7 +16,7 @@ const Movie = require("../Models/movieModel.js");
 
 const router = express.Router();
 
-router.route("/").get(getAllMovies).post(addMovie);
+router.route("/").get(getAllMovies).post(upload.single("coverImage"), addMovie);
 router
   .route("/:id")
   .get(checkIfExistsById(Movie), getMovieById)

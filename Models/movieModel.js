@@ -1,36 +1,59 @@
 const mongoose = require("mongoose");
 
-const movieSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: [true, "Movie title required"],
-    unique: true,
-    trim: true,
+const movieSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: [true, "Movie title required"],
+      unique: true,
+      trim: true,
+    },
+    slug: {
+      type: String,
+      unique: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
+    duration: {
+      type: Number,
+      required: [true, "Movie duration required"],
+      min: [1, "Duration must be at least 1 minute"],
+    },
+    releaseYear: {
+      type: Number,
+      required: [true, "Movie release year required"],
+    },
+    ratings: {
+      type: Number,
+      min: [1, "Rating must be at least 1.0"],
+      max: [10, "Rating cannot exceed 10.0"],
+    },
+    totalRatings: Number,
+    releaseDate: {
+      type: Date,
+      required: [true, "Movie releaseDate required"],
+    },
+    genres: {
+      type: [String],
+      required: [true, "Movie genres required"],
+    },
+    director: {
+      type: [String],
+      required: [true, "Movie director name required"],
+    },
+    casts: {
+      type: [String],
+      required: [true, "Movie casts required"],
+    },
+    coverImage: {
+      type: String,
+      required: [true, "Movie coverImage required"],
+    },
   },
-  slug: {
-    type: String,
-    unique: true,
-  },
-  description: {
-    type: String,
-    trim: true,
-  },
-  duration: {
-    type: Number,
-    required: [true, "Movie duration required"],
-    min: [1, "Duration must be at least 1 minute"],
-  },
-  releaseYear: {
-    type: Number,
-    required: [true, "Movie release year required"],
-  },
-  ratings: {
-    type: Number,
-    default: 1.0,
-    min: [1, "Rating must be at least 1.0"],
-    max: [10, "Rating cannot exceed 10.0"],
-  },
-});
+  { timestamps: true }
+);
 
 movieSchema.pre("save", function (next) {
   if (!this.title) return next();
