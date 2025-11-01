@@ -47,12 +47,39 @@ const movieSchema = new mongoose.Schema(
       type: [String],
       required: [true, "Movie casts required"],
     },
+    language: {
+      type: [String],
+    },
     coverImage: {
       type: String,
       required: [true, "Movie coverImage required"],
     },
+    price: {
+      type: Number,
+      required: [true, "Movie price required"],
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform(doc, ret) {
+        delete ret.__v;
+        delete ret._id; // hide for response
+        delete ret.createdAt; // optional
+        return ret;
+      },
+    },
+    toObject: {
+      virtuals: true,
+      transform(doc, ret) {
+        delete ret.__v;
+        delete ret._id;
+        delete ret.createdAt;
+        return ret;
+      },
+    },
+  }
 );
 
 movieSchema.pre("save", function (next) {
