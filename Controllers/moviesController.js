@@ -1,6 +1,7 @@
 const Movie = require("./../Models/movieModel.js");
 const uploadToCloudinary = require("./../Utils/cloudinary.js");
 const AppError = require("../Utils/appError.js");
+const APIFeatures = require("../Utils/apiFeatures.js");
 
 const getHighestRatedMovie = (req, res, next) => {
   // middleware for "/highest-rated route"
@@ -14,44 +15,13 @@ const getHighestRatedMovie = (req, res, next) => {
 
 const getAllMovies = async (req, res, next) => {
   try {
-    let queryStr = JSON.stringify(req.query);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    const features = new APIFeatures(Movie, req.query, true)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
 
-    const queryObj = JSON.parse(queryStr);
-
-    ["sort", "fields", "page", "limit"].forEach((key) => delete queryObj[key]);
-
-    let query = Movie.find(queryObj);
-
-    // SORTING LOGIC
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(",").join(" ");
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort("-createdAt");
-    }
-
-    // LIMITING FIELDS
-    if (req.query.fields) {
-      const fields = req.query.fields.split(",").join(" ");
-      query = query.select(fields);
-    }
-
-    // PAGINATION
-    const page = req.query.page || 1;
-    const limit = req.query.limit || 10;
-
-    const skip = (page - 1) * limit;
-    const moviesCount = await Movie.countDocuments();
-    if (skip >= moviesCount && moviesCount !== 0) {
-      return next(
-        new AppError("Requested page exceeds total number of documents", 400)
-      );
-    }
-
-    query = query.skip(skip).limit(limit);
-
-    const movies = await query;
+    const movies = await features.query.exec();
 
     res.status(200).json({
       status: "success",
