@@ -1,8 +1,12 @@
 const express = require("express");
+const qs = require("qs");
 const moviesRouter = require("./Routes/moviesRoutes.js");
 const globalErrorHandler = require("./Middlewares/globalErrorHandler.js");
 
 const app = express();
+
+app.set("query parser", (str) => qs.parse(str));
+
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());

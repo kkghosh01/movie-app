@@ -11,11 +11,13 @@ const {
   updateMovie,
   deleteMovie,
   getMovieBySlug,
+  getHighestRatedMovie,
 } = require("../Controllers/moviesController.js");
 const Movie = require("../Models/movieModel.js");
 
 const router = express.Router();
 
+router.route("/highest-rated").get(getHighestRatedMovie, getAllMovies);
 router.route("/").get(getAllMovies).post(upload.single("coverImage"), addMovie);
 router
   .route("/:id")
