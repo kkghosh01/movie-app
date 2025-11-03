@@ -1,0 +1,19 @@
+A new movie document with name Taxi Driver has been created at 2025-11-03T11:49:46.661Z
+A new movie document with name The Lord of the Rings: The Two Towers has been created at 2025-11-03T12:25:30.921Z
+A new movie document with name The Odyssey has been created at 2025-11-03T14:09:19.358Z
+Query tooks 60 ms to find the documents
+Query took 69 ms to find 8 documents
+Query took unknown ms to find 0 documents
+Query took unknown ms to find 0 documents
+Query took unknown ms to find 0 documents
+Query took unknown ms to find 0 documents
+Query took unknown ms to find 0 documents
+Query took unknown ms to find 0 documents
+Query took unknown ms to find 0 documents
+Query took 58 ms to find 0 documents
+Query took 69 ms to find 0 documents
+Query took unknown ms to find 1 documents
+Query took 78 ms to find 8 documents
+Query took unknown ms to find 1 documents
+Query took 61 ms to find 8 documents
+Query took unknown ms to find 1 documents

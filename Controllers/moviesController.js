@@ -249,6 +249,21 @@ const getMoviesByGenre = async (req, res, next) => {
     next(error);
   }
 };
+const getUpcomingMovies = async (req, res, next) => {
+  try {
+    const upcomingMovies = await Movie.find({
+      releaseDate: { $gt: Date.now() },
+    });
+
+    res.status(200).json({
+      status: "success",
+      results: upcomingMovies.length,
+      data: { upcomingMovies },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   getAllMovies,
@@ -260,4 +275,5 @@ module.exports = {
   getHighestRatedMovie,
   getMoviesStats,
   getMoviesByGenre,
+  getUpcomingMovies,
 };

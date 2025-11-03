@@ -1,10 +1,10 @@
 const multer = require("multer");
 
-// Memory storage ব্যবহার করা হচ্ছে
+// Use Memory storage
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  const allowedFileTypes = /jpeg|jpg|png|gif/;
+  const allowedFileTypes = /jpeg|jpg|png|gif|webp/;
   const isValid = allowedFileTypes.test(file.mimetype.toLowerCase());
 
   if (isValid) cb(null, true);

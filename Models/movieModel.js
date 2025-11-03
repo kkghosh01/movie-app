@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const fs = require("fs");
+const path = require("path");
 
 const movieSchema = new mongoose.Schema(
   {
@@ -82,6 +84,10 @@ const movieSchema = new mongoose.Schema(
   }
 );
 
+movieSchema.virtual("durationInHours").get(function () {
+  return this.duration / 60;
+});
+
 movieSchema.pre("save", function (next) {
   if (!this.title) return next();
 
@@ -104,12 +110,50 @@ movieSchema.pre("save", function (next) {
   next();
 });
 
+movieSchema.post("save", function (doc, next) {
+  const content = `A new movie document with name ${
+    doc.title
+  } has been created at ${new Date().toISOString()}\n`;
+
+  const logPath = path.join(__dirname, "../log/log.txt");
+
+  fs.appendFile(logPath, content, (err) => {
+    if (err) {
+      console.error("Failed to append log:", err);
+    }
+    next();
+  });
+});
+
+movieSchema.pre(/^find/, function (next) {
+  // explicit filter if upcoming movies then skip
+  if (this.getQuery().releaseDate && this.getQuery().releaseDate.$gt) {
+    return next();
+  }
+
+  // default: only releases movies
+  this.find({ releaseDate: { $lte: Date.now() } });
+  this.startTime = Date.now();
+  next();
+});
+
+movieSchema.post(/^find/, function (docs, next) {
+  const duration = this.startTime ? Date.now() - this.startTime : "unknown";
+  const content = `Query took ${duration} ms to find ${docs.length} documents\n`;
+
+  const logPath = path.join(__dirname, "../log/log.txt");
+
+  fs.appendFile(logPath, content, (err) => {
+    if (err) console.error("Failed to append log:", err);
+    next();
+  });
+});
 const Movie = mongoose.model("Movie", movieSchema);
 
 // update all old data without slug
 /*
 async function addSlugToExistingMovies() {
-  const movies = await Movie.find({ slug: { $exists: false } }); // যাদের slug নেই
+  const movies = await Movie.find({ slug: { $exists: false } }); 
   for (let movie of movies) {
     movie.slug = movie.title.toLowerCase().replace(/\s+/g, "-");
     await movie.save();
