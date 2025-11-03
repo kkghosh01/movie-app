@@ -12,12 +12,16 @@ const {
   deleteMovie,
   getMovieBySlug,
   getHighestRatedMovie,
+  getMoviesStats,
+  getMoviesByGenre,
 } = require("../Controllers/moviesController.js");
 const Movie = require("../Models/movieModel.js");
 
 const router = express.Router();
 
 router.route("/highest-rated").get(getHighestRatedMovie, getAllMovies);
+router.route("/movies-stats").get(getMoviesStats);
+router.route("/movies-by-genre/:genre").get(getMoviesByGenre);
 router.route("/").get(getAllMovies).post(upload.single("coverImage"), addMovie);
 router
   .route("/:id")

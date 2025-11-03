@@ -1,3 +1,5 @@
+const AppError = require("../Utils/appError.js");
+
 class APIFeatures {
   /**
    * @param {Object} query - Mongoose query object (e.g., Movie.find())
@@ -11,12 +13,36 @@ class APIFeatures {
   }
 
   filter() {
+    const allowedFilters = [
+      "genres",
+      "director",
+      "casts",
+      "language",
+      "ratings",
+      "price",
+      "releaseYear",
+      "sort",
+      "fields",
+      "page",
+      "limit",
+      "duration",
+    ];
+
     // Deep copy of queryString
     let queryStr = JSON.stringify(this.queryString);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
     let queryObj = JSON.parse(queryStr);
 
+    // Validate all keys
+    Object.keys(queryObj).forEach((key) => {
+      const match = key.match(/^(.+)\[(gte|gt|lte|lt)\]$/);
+      const field = match ? match[1] : key;
+
+      if (!allowedFilters.includes(field)) {
+        throw new AppError(`Invalid query parameter: ${key}`, 400);
+      }
+    });
     // Remove non-filter fields
     ["sort", "fields", "page", "limit"].forEach((key) => delete queryObj[key]);
 
@@ -27,7 +53,7 @@ class APIFeatures {
         if (queryObj[field]) {
           const values = Array.isArray(queryObj[field])
             ? queryObj[field]
-            : queryObj[field].split(",");
+            : queryObj[field].toString().split(",");
 
           queryObj[field] = {
             $in: values.map((v) => new RegExp(`^${v}$`, "i")),
@@ -61,9 +87,16 @@ class APIFeatures {
   paginate() {
     const page = parseInt(this.queryString.page, 10) || 1;
     const limit = parseInt(this.queryString.limit, 10) || 10;
+
+    if (page <= 0 || limit <= 0) {
+      throw new AppError("Page and limit must be positive numbers", 400);
+    }
+
     const skip = (page - 1) * limit;
 
     this.query = this.query.skip(skip).limit(limit);
+    this.skip = skip;
+    this.limit = limit;
     return this;
   }
 }

@@ -1,7 +1,7 @@
 const globalErrorHandler = (err, req, res, next) => {
   console.error("🔥 ERROR:", err);
 
-  // যদি custom error না হয়
+  // if not custom error
   if (!err.isOperational) {
     err.statusCode = 500;
     err.status = "error";
