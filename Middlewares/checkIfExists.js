@@ -1,51 +1,47 @@
+const mongoose = require("mongoose");
+const AppError = require("../Utils/appError.js");
+
 const checkIfExistsById = (Model, paramId = "id") => {
   return async (req, res, next) => {
     try {
-      const doc = await Model.findById(req.params[paramId]);
+      const id = req.params[paramId];
+
+      //Invalid ObjectId check
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return next(new AppError(`Invalid ${Model.modelName} id`, 400));
+      }
+
+      const doc = await Model.findById(id);
+      console.log("document", doc);
       if (!doc) {
-        return res.status(404).json({
-          status: "fail",
-          message: `${Model.modelName} not found`,
-        });
+        return next(new AppError(`Invalid ${Model.modelName} not found`, 404));
       }
 
       req.doc = doc;
       next();
     } catch (error) {
-      res.status(500).json({
-        status: "fail",
-        message: error.errors
-          ? Object.values(error.errors)
-              .map((el) => el.message)
-              .join(",")
-          : error.message,
-      });
+      if (error.name === "CastError" || error.name === "TypeError") {
+        return next(new AppError(`Invalid ${Model.modelName} id`, 400));
+      }
+      next(error);
     }
   };
 };
 
-const checkIfExistsBySlug = (Model, param = "slug") => {
+const checkIfExistsBySlug = (Model, paramSlug = "slug") => {
   return async (req, res, next) => {
     try {
-      const doc = await Model.findOne({ slug: req.params[param] });
+      const slug = req.params[paramSlug];
+      const doc = await Model.findOne({ slug });
+
       if (!doc) {
-        return res.status(404).json({
-          status: "fail",
-          message: `${Model.modelName} not found`,
-        });
+        return next(new AppError(`${Model.modelName} not found`, 404));
       }
 
       req.doc = doc;
       next();
     } catch (error) {
-      res.status(500).json({
-        status: "fail",
-        message: error.errors
-          ? Object.values(error.errors)
-              .map((el) => el.message)
-              .join(",")
-          : error.message,
-      });
+      next(error);
     }
   };
 };

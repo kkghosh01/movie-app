@@ -47,7 +47,7 @@ const getAllMovies = async (req, res, next) => {
   }
 };
 
-const getMovieById = (req, res) => {
+const getMovieById = (req, res, next) => {
   try {
     const movie = req.doc;
     res.status(200).json({
@@ -57,14 +57,11 @@ const getMovieById = (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      status: "fail",
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-const getMovieBySlug = (req, res) => {
+const getMovieBySlug = (req, res, next) => {
   try {
     const movie = req.doc;
     res.status(200).json({
@@ -74,14 +71,11 @@ const getMovieBySlug = (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      status: "fail",
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-const addMovie = async (req, res) => {
+const addMovie = async (req, res, next) => {
   try {
     // getting coverImage file buffer
     if (!req.file) {
@@ -104,10 +98,7 @@ const addMovie = async (req, res) => {
       data: { movie },
     });
   } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      message: error.message,
-    });
+    next(error);
   }
 };
 
@@ -135,19 +126,12 @@ const updateMovie = async (req, res) => {
   }
 };
 
-const deleteMovie = async (req, res) => {
+const deleteMovie = async (req, res, next) => {
   try {
     await Movie.findByIdAndDelete(req.doc._id);
     res.status(204).send();
   } catch (error) {
-    res.status(500).json({
-      status: "fail",
-      message: error.errors
-        ? Object.values(error.errors)
-            .map((el) => el.message)
-            .join(",")
-        : error.message,
-    });
+    next(error);
   }
 };
 
