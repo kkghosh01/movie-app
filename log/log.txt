@@ -37,3 +37,9 @@ Query took 64 ms to find undefined documents
 Query took 61 ms to find undefined documents
 Query took 58 ms to find undefined documents
 Query took 57 ms to find undefined documents
+Query took 62 ms to find 8 documents
+Query took 54 ms to find undefined documents
+Query took 47 ms to find 1 documents
+Query took 49 ms to find 3 documents
+Query took 58 ms to find 3 documents
+Query took 81 ms to find 1 documents

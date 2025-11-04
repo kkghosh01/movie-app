@@ -1,10 +1,10 @@
-require("dotenv").config();
 const mongoose = require("mongoose");
+const config = require("./config.js");
 const app = require("./index.js");
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${encodeURIComponent(
-  process.env.DB_PASSWORD
-)}@${process.env.DB_CLUSTER}/${process.env.DB_NAME}?appName=Cluster0`;
+const uri = `mongodb+srv://${config.dbUser}:${encodeURIComponent(
+  config.dbPassword
+)}@${config.dbCluster}/${config.dbName}?appName=Cluster0`;
 
 mongoose
   .connect(uri)
@@ -14,5 +14,7 @@ mongoose
 const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
-  console.log(`Server is running and listening on port ${port}`);
+  console.log(
+    `Server is running and listening on port ${port} [${config.env}]`
+  );
 });

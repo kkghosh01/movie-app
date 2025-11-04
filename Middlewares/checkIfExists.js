@@ -12,7 +12,6 @@ const checkIfExistsById = (Model, paramId = "id") => {
       }
 
       const doc = await Model.findById(id);
-      console.log("document", doc);
       if (!doc) {
         return next(new AppError(`Invalid ${Model.modelName} not found`, 404));
       }
