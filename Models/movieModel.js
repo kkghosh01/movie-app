@@ -148,6 +148,13 @@ movieSchema.post(/^find/, function (docs, next) {
     next();
   });
 });
+
+movieSchema.pre("aggregate", function (next) {
+  this.pipeline().unshift({ $match: { releaseDate: { $lte: new Date() } } });
+
+  next();
+});
+
 const Movie = mongoose.model("Movie", movieSchema);
 
 // update all old data without slug

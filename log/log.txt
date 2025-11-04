@@ -17,3 +17,6 @@ Query took 78 ms to find 8 documents
 Query took unknown ms to find 1 documents
 Query took 61 ms to find 8 documents
 Query took unknown ms to find 1 documents
+Query took 64 ms to find 8 documents
+Query took 58 ms to find 8 documents
+Query took 72 ms to find 8 documents
