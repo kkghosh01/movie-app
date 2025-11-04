@@ -1,2 +1,7 @@
+# root env files
 .env
+.env.development
+.env.production
+
+# node_modules folder ignore
 node_modules/
