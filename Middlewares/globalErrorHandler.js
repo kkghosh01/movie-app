@@ -8,6 +8,15 @@ const handleDuplicateKeyError = (err) => {
   return new AppError(message, 400);
 };
 
+const handleValidationError = (err) => {
+  const errors = Object.values(err.errors).map((val) => val.message);
+  const errMessages = errors.join(". ");
+
+  const message = `Invalid input data ${errMessages}`;
+
+  return new AppError(message, 400);
+};
+
 const globalErrorHandler = (err, req, res, next) => {
   const env = process.env.NODE_ENV || "development";
 
@@ -28,6 +37,10 @@ const globalErrorHandler = (err, req, res, next) => {
 
   // Handle MongoDB Duplicate Key Error
   if (err.code === 11000) error = handleDuplicateKeyError(err);
+  if (err.name === "ValidationError") error = handleValidationError(err);
+  if (error.name === "CastError") {
+    error = new AppError(`Invalid ${error.path}: ${error.value}`, 400);
+  }
 
   if (env === "development") {
     res.status(error.statusCode).json({
