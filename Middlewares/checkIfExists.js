@@ -19,7 +19,7 @@ const checkIfExistsById = (Model, paramId = "id") => {
       req.doc = doc;
       next();
     } catch (error) {
-      if (error.name === "CastError" || error.name === "TypeError") {
+      if (error.name === "CastError") {
         return next(new AppError(`Invalid ${Model.modelName} id`, 400));
       }
       next(error);

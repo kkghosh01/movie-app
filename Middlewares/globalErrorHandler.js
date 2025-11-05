@@ -1,7 +1,16 @@
+const AppError = require("../Utils/appError");
+
+const handleDuplicateKeyError = (err) => {
+  const field = Object.keys(err.keyValue)[0];
+  const value = err.keyValue[field];
+
+  const message = `${field}: "${value}" already exists. Please try another!`;
+  return new AppError(message, 400);
+};
+
 const globalErrorHandler = (err, req, res, next) => {
   const env = process.env.NODE_ENV || "development";
 
-  // Console log for all environments (optional)
   console.error(
     `🔥 ERROR OCCURRED AT ${new Date().toLocaleString("en-BD", {
       timeZone: "Asia/Dhaka",
@@ -9,31 +18,37 @@ const globalErrorHandler = (err, req, res, next) => {
     err
   );
 
-  // If not custom/operational error, set default
-  if (!err.isOperational) {
-    err.statusCode = 500;
-    err.status = "error";
-    if (env === "production") {
-      // Hide internal error details in production
-      err.message = "Something went very wrong!";
-    }
-  }
+  // Default values if not present
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || "error";
 
-  // Response according to environment
+  // Clone safely (keep prototype)
+  let error = Object.create(err);
+  error.message = err.message;
+
+  // Handle MongoDB Duplicate Key Error
+  if (err.code === 11000) error = handleDuplicateKeyError(err);
+
   if (env === "development") {
-    // Detailed error for dev
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message,
-      stack: err.stack,
-      error: err,
+    res.status(error.statusCode).json({
+      status: error.status,
+      message: error.message,
+      error,
+      stack: error.stack,
     });
   } else {
-    // Production → user-friendly
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message,
-    });
+    if (error.isOperational) {
+      res.status(error.statusCode).json({
+        status: error.status,
+        message: error.message,
+      });
+    } else {
+      console.error("❌ UNEXPECTED ERROR:", error);
+      res.status(500).json({
+        status: "error",
+        message: "Something went very wrong!",
+      });
+    }
   }
 };
 
