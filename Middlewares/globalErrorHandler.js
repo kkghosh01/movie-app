@@ -4,7 +4,7 @@ const handleDuplicateKeyError = (err) => {
   const field = Object.keys(err.keyValue)[0];
   const value = err.keyValue[field];
 
-  const message = `${field}: "${value}" already exists. Please try another!`;
+  const message = `${field}: ${value} already exists. Please try another!`;
   return new AppError(message, 400);
 };
 
