@@ -10,7 +10,7 @@ const signToken = (id) => {
 
 const createUser = async (req, res, next) => {
   try {
-    const { name, email, password, confirmPassword, avatar } = req.body;
+    const { name, email, password, confirmPassword, avatar, role } = req.body;
 
     const newUser = await User.create({
       name,
@@ -18,6 +18,7 @@ const createUser = async (req, res, next) => {
       password,
       confirmPassword,
       avatar,
+      role,
     });
 
     const userData = newUser.toObject();

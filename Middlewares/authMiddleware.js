@@ -28,4 +28,19 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = protect;
+const restrictRole = (role) => {
+  return (req, res, next) => {
+    try {
+      if (req.user.role !== role) {
+        return next(
+          new AppError("You don't have permission to perform this action", 403)
+        );
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+module.exports = { protect, restrictRole };
