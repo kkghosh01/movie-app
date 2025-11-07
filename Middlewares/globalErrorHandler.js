@@ -17,6 +17,14 @@ const handleValidationError = (err) => {
   return new AppError(message, 400);
 };
 
+const handleExpiredToken = (err) => {
+  return new AppError("Your session has expired. Please log in again.", 401);
+};
+
+const handleJWTError = (err) => {
+  return new AppError("Invalid token. Please log in again!", 401);
+};
+
 const globalErrorHandler = (err, req, res, next) => {
   const env = process.env.NODE_ENV || "development";
 
@@ -41,6 +49,8 @@ const globalErrorHandler = (err, req, res, next) => {
   if (error.name === "CastError") {
     error = new AppError(`Invalid ${error.path}: ${error.value}`, 400);
   }
+  if (err.name === "TokenExpiredError") error = handleExpiredToken(err);
+  if (err.name === "JsonWebTokenError") error = handleJWTError(err);
 
   if (env === "development") {
     res.status(error.statusCode).json({

@@ -46,3 +46,10 @@ Query took 81 ms to find 1 documents
 Query took 66 ms to find 8 documents
 Query took 59 ms to find 8 documents
 Query took 65 ms to find undefined documents
+Query took 68 ms to find 8 documents
+Query took 71 ms to find 8 documents
+Query took 92 ms to find 8 documents
+Query took 58 ms to find 8 documents
+Query took 69 ms to find 8 documents
+Query took 67 ms to find 8 documents
+Query took 59 ms to find 8 documents

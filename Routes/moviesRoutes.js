@@ -17,6 +17,7 @@ const {
   getUpcomingMovies,
 } = require("../Controllers/moviesController.js");
 const Movie = require("../Models/movieModel.js");
+const protect = require("../Middlewares/authMiddleware.js");
 
 const router = express.Router();
 
@@ -24,7 +25,10 @@ router.route("/highest-rated").get(getHighestRatedMovie, getAllMovies);
 router.route("/movies-stats").get(getMoviesStats);
 router.route("/movies-by-genre/:genre").get(getMoviesByGenre);
 router.route("/upcoming-movies").get(getUpcomingMovies);
-router.route("/").get(getAllMovies).post(upload.single("coverImage"), addMovie);
+router
+  .route("/")
+  .get(protect, getAllMovies)
+  .post(upload.single("coverImage"), addMovie);
 router
   .route("/:id")
   .get(checkIfExistsById(Movie), getMovieById)
