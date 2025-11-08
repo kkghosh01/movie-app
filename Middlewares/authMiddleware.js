@@ -21,6 +21,12 @@ const protect = async (req, res, next) => {
       return next(new AppError("The user no longer exists", 401));
     }
 
+    if (currentUser.isPasswordChanged(decoded.iat)) {
+      return next(
+        new AppError("The password has been changed. Please login again!", 401)
+      );
+    }
+
     req.user = currentUser;
     next();
   } catch (error) {
