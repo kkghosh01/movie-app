@@ -65,6 +65,9 @@ const userSchema = new mongoose.Schema(
         delete ret.confirmPassword;
         delete ret.__v;
         delete ret._id;
+        delete ret.passwordChangedAt;
+        delete ret.passwordResetToken;
+        delete ret.passwordResetTokenExpires;
         return ret;
       },
     },

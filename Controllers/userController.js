@@ -144,4 +144,43 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-module.exports = { createUser, userLogin, forgotPassword, resetPassword };
+const updatePassword = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select("+password");
+    if (
+      !(await user.comparePassword(req.body.currentPassword, user.password))
+    ) {
+      return next(
+        new AppError("The current password is wrong. Please try again!", 401)
+      );
+    }
+
+    user.password = req.body.password;
+    user.confirmPassword = req.body.confirmPassword;
+
+    user.passwordChangedAt = Date.now() - 1000;
+
+    await user.save();
+
+    const token = signToken(user._id);
+
+    res.status(200).json({
+      status: "success",
+      message: "Password updated successfully",
+      token,
+      data: {
+        user,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  createUser,
+  userLogin,
+  forgotPassword,
+  resetPassword,
+  updatePassword,
+};
