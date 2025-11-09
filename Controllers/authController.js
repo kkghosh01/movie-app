@@ -57,7 +57,7 @@ const forgotPassword = async (req, res, next) => {
     //Construct reset URL
     const resetUrl = `${req.protocol}://${req.get(
       "host"
-    )}/api/v1/users/reset-password/${resetToken}`;
+    )}/api/v1/auth/reset-password/${resetToken}`;
 
     //Message for email
     const message = `We have received a password reset request. Please use the below link to reset your password\n\n${resetUrl}\n\nThis link will be valid for 10 minutes.`;
