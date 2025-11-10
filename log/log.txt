@@ -58,3 +58,4 @@ Query took 55 ms to find 8 documents
 Query took 54 ms to find undefined documents
 Query took 58 ms to find undefined documents
 Query took 62 ms to find 7 documents
+Query took 58 ms to find 7 documents
