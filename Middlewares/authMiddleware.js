@@ -16,14 +16,18 @@ const protect = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const currentUser = await User.findById(decoded.id);
+    const currentUser = await User.findById(decoded.id).select("+active");
     if (!currentUser) {
       return next(new AppError("The user no longer exists", 401));
     }
 
+    if (currentUser.active === false) {
+      return next(new AppError("Your account is deactivated", 401));
+    }
+
     if (currentUser.isPasswordChanged(decoded.iat)) {
       return next(
-        new AppError("The password has been changed. Please login again!", 401)
+        new AppError("Password changed recently. Please log in again!", 401)
       );
     }
 
