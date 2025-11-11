@@ -10,9 +10,12 @@ process.on("uncaughtException", (err) => {
 
 const app = require("./index.js");
 
-const uri = `mongodb+srv://${config.dbUser}:${encodeURIComponent(
-  config.dbPassword
-)}@${config.dbCluster}/${config.dbName}?appName=Cluster0`;
+const uri =
+  config.dbUser && config.dbPassword
+    ? `mongodb+srv://${config.dbUser}:${encodeURIComponent(
+        config.dbPassword
+      )}@${config.dbCluster}/${config.dbName}?appName=Cluster0`
+    : `mongodb://${config.dbCluster}/${config.dbName}`;
 
 mongoose
   .connect(uri)

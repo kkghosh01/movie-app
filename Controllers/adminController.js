@@ -3,6 +3,56 @@ const AppError = require("../Utils/appError.js");
 const createSafeResponse = require("../Utils/safeUserResponse.js");
 const filterReqObj = require("../Utils/filtereReqObj.js");
 
+/**
+ * Admin-only: Create a new admin
+ * Only accessible by an existing admin
+ */
+const createAdminByadmin = async (req, res, next) => {
+  try {
+    const { name, email, password, confirmPassword, avatar, role } = req.body;
+
+    // Check required fields
+    if (!name || !email || !password || !confirmPassword) {
+      return next(new AppError("Name, email, password are required", 400));
+    }
+
+    //  Prevent role override by non-admin (extra safety)
+    const assignedRole = role === "admin" ? "admin" : "user";
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return next(new AppError("User with this email already exists", 400));
+    }
+
+    // Create new admin/user
+    const newUser = await User.create({
+      name,
+      email: email.toLowerCase(),
+      password,
+      confirmPassword,
+      avatar,
+      role: assignedRole,
+      active: true,
+    });
+
+    // Audit log
+    console.log(
+      `🛡️ Admin ${req.user.email} created a new ${assignedRole}: ${newUser.email}`
+    );
+
+    // Response (without exposing password, sensitive info)
+    createSafeResponse(
+      newUser,
+      201,
+      res,
+      `New ${assignedRole} created successfully`
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+
 const updateUserByAdmin = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
@@ -102,4 +152,4 @@ const deleteUserByAdmin = async (req, res, next) => {
   }
 };
 
-module.exports = { updateUserByAdmin, deleteUserByAdmin };
+module.exports = { createAdminByadmin, updateUserByAdmin, deleteUserByAdmin };
