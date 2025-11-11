@@ -5,11 +5,16 @@ const AppError = require("../Utils/appError.js");
 const protect = async (req, res, next) => {
   try {
     let token;
+    // Check Authorization header
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
     ) {
       token = req.headers.authorization.split(" ")[1];
+    }
+    // Check JWT cookie
+    else if (req.cookies && req.cookies.jwt) {
+      token = req.cookies.jwt;
     }
 
     if (!token) return next(new AppError("You are not loged in", 401));

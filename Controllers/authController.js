@@ -1,12 +1,15 @@
+const crypto = require("crypto");
 const User = require("../Models/userModel.js");
 const AppError = require("../Utils/appError.js");
 const sendEmail = require("../Utils/email.js");
-const crypto = require("crypto");
 const createSafeResponse = require("../Utils/safeUserResponse.js");
 
 const createUser = async (req, res, next) => {
   try {
     const { name, email, password, confirmPassword, avatar, role } = req.body;
+
+    // Prevent self-assigning admin role
+    const userRole = role === "admin" ? "user" : role;
 
     const newUser = await User.create({
       name,
@@ -14,7 +17,7 @@ const createUser = async (req, res, next) => {
       password,
       confirmPassword,
       avatar,
-      role,
+      role: userRole,
     });
     // RESPONSE HANDLING
     createSafeResponse(newUser, 201, res, "User created successfully");
@@ -33,9 +36,14 @@ const userLogin = async (req, res, next) => {
 
     const user = await User.findOne({ email }).select("+password");
 
-    if (!user || !(await user.comparePassword(password, user.password))) {
+    if (!user) {
       return next(new AppError("Incorrect email or password", 400));
     }
+
+    if (!(await user.comparePassword(password, user.password))) {
+      return next(new AppError("Incorrect email or password", 400));
+    }
+
     // RESPONSE HANDLING
     createSafeResponse(user, 200, res, "Logged in successfully");
   } catch (error) {
@@ -43,9 +51,24 @@ const userLogin = async (req, res, next) => {
   }
 };
 
+// Logout
+const userLogout = (req, res) => {
+  res.cookie("jwt", "loggedout", {
+    maxAge: 10 * 1000,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
+
+  res
+    .status(200)
+    .json({ status: "success", message: "Logged out successfully" });
+};
+
 const forgotPassword = async (req, res, next) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: req.body.email.toLowerCase() });
     if (!user) {
       return next(new AppError("User not found", 404));
     }
@@ -57,7 +80,7 @@ const forgotPassword = async (req, res, next) => {
     //Construct reset URL
     const resetUrl = `${req.protocol}://${req.get(
       "host"
-    )}/api/v1/auth/reset-password/${resetToken}`;
+    )}/reset-password/${resetToken}`; // frontend route
 
     //Message for email
     const message = `We have received a password reset request. Please use the below link to reset your password\n\n${resetUrl}\n\nThis link will be valid for 10 minutes.`;
@@ -67,7 +90,7 @@ const forgotPassword = async (req, res, next) => {
       await sendEmail({
         email: user.email,
         subject: "Password change request received",
-        message: message,
+        message,
       });
       res.status(200).json({
         status: "success",
@@ -127,6 +150,7 @@ const resetPassword = async (req, res, next) => {
 module.exports = {
   createUser,
   userLogin,
+  userLogout,
   forgotPassword,
   resetPassword,
 };

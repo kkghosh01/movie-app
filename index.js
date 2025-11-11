@@ -1,4 +1,5 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const qs = require("qs");
 const moviesRouter = require("./Routes/moviesRoutes.js");
 const authRouter = require("./Routes/authRouter.js");
@@ -9,6 +10,8 @@ const globalErrorHandler = require("./Middlewares/globalErrorHandler.js");
 const AppError = require("./Utils/appError.js");
 
 const app = express();
+
+app.use(cookieParser());
 
 app.set("query parser", (str) => qs.parse(str));
 
