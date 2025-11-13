@@ -4,6 +4,9 @@ const AppError = require("../Utils/appError.js");
 const sendEmail = require("../Utils/email.js");
 const createSafeResponse = require("../Utils/safeUserResponse.js");
 
+const MAX_ATTEMPTS = 5;
+const LOCK_TIME = 10 * 60 * 1000;
+
 const createUser = async (req, res, next) => {
   try {
     const { name, email, password, confirmPassword, avatar, role } = req.body;
@@ -40,9 +43,51 @@ const userLogin = async (req, res, next) => {
       return next(new AppError("Incorrect email or password", 400));
     }
 
-    if (!(await user.comparePassword(password, user.password))) {
-      return next(new AppError("Incorrect email or password", 400));
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      return next(new AppError("Account locked. Try again later.", 403));
     }
+
+    const isCorrectPassword = await user.comparePassword(
+      password,
+      user.password
+    );
+    if (!isCorrectPassword) {
+      user.failedLoginAttempts += 1;
+
+      if (user.failedLoginAttempts >= MAX_ATTEMPTS) {
+        user.lockUntil = Date.now() + LOCK_TIME;
+        await user.save();
+        // Send lock email notification
+        try {
+          await sendEmail({
+            email: user.email,
+            subject: "Account Locked Due to Multiple Login Attempts",
+            message: `Your account has been locked for ${
+              LOCK_TIME / 60000
+            } minutes due to multiple failed login attempts. If this wasn't you, reset your password immediately.`,
+          });
+        } catch (err) {
+          return next(
+            new AppError(
+              "Failed to send account lock notification email. Please contact support.",
+              500
+            )
+          );
+        }
+
+        return next(
+          new AppError("Too many attempts. Account locked for 10 min.", 423)
+        );
+      }
+
+      await user.save();
+      return next(new AppError("Invalid credentials", 401));
+    }
+
+    // Successful login
+    user.failedLoginAttempts = 0;
+    user.lockUntil = undefined;
+    await user.save();
 
     // RESPONSE HANDLING
     createSafeResponse(user, 200, res, "Logged in successfully");
@@ -102,12 +147,7 @@ const forgotPassword = async (req, res, next) => {
       user.passwordResetTokenExpires = undefined;
       await user.save({ validateBeforeSave: false });
 
-      return next(
-        new AppError(
-          "There was an error sending the email. Please try again later.",
-          500
-        )
-      );
+      return next(new AppError("Error sending email. Try again later.", 500));
     }
   } catch (error) {
     next(error);

@@ -26,6 +26,8 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       select: false,
     },
+    failedLoginAttempts: { type: Number, default: 0 },
+    lockUntil: Date,
     confirmPassword: {
       type: String,
       required: [true, "Please type same password"],
